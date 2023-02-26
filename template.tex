@@ -1,0 +1,389 @@
+\documentclass[UTF8]{article}
+\usepackage{listings}
+\usepackage{fontspec}
+\usepackage{ctex}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{abstract}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage[colorlinks,linkcolor=black,citecolor=black]{hyperref}
+\geometry{a4paper,left=2.5cm,right=2cm,top=2cm,bottom=2cm}
+
+\lstset{
+    basicstyle=\tt,
+    keywordstyle=\color{blue}\bfseries,
+    identifierstyle=\color{black!80!black}\bfseries,
+    commentstyle=\color{gray},
+    showstringspaces=false,
+}
+
+\newcommand{\cppcode}[1]{
+    \lstinputlisting[language=C++,numbers=left,numberstyle=\tiny,basicstyle=\ttfamily,frame=tblr]{./source/#1}
+}
+
+\title{模板}
+\author{Ether Strike}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\section{数学}
+\subsection{线性代数}
+
+\subsubsection{矩阵乘法}
+\cppcode{matrix.cpp}
+
+\subsubsection{幺半群--证明结合律的工具}
+	满足结合律就可以使用矩阵加速(如{max,+})
+
+	定义：零元($O$)， 加法($+$)， 乘法($\times$)
+
+	矩阵乘法的形式: $c_{i,j} = \sum a_{i,k}\times b_{k,j}$
+
+	如果一个运算满足结合律， 当且仅当它满足
+	
+	\begin{enumerate}
+		\item[1.]$O\times A = O$
+		\item[2.]$(a+b)+c = a+(b+c)$
+		\item[3.]$(a\times b)\times c = a\times(b\times c)$
+		\item[4.]$(a+b)\times c = a\times c + b\times c$
+		\item[5.]$a\times(b+c) = a\times b + a\times c$
+	\end{enumerate}
+
+	example: $c_{i,j} = min\{ max\{a_{i,k}, b_{k,j}\}\}$
+	此处$min$为加法， $max$为乘法， 零元为$\infty$
+	
+\subsubsection{线性基}
+\cppcode{Linear.cpp}
+
+\subsubsection{矩阵树定理}
+$O(N^3)$求以每个点为根的外向树
+\cppcode{MatrixTree2.cpp}
+
+
+\subsection{gcd相关}
+\cppcode{exgcd.cpp}
+
+\subsection{数相关}
+\subsubsection{生成函数}
+
+\begin{enumerate}
+	\item[1.] $e^{dx}[\frac{x^n}{n!}] = \frac{d^n}{n!}$
+	\item[2.] $(e^x-1)^d[\frac{x^n}{n!}] = {n\brace d}d!$
+	\item[3.] $\frac{1}{(x-1)^d}[x^n] = \binom{n+d-1}{d-1} $
+\end{enumerate}
+
+\subsubsection{斯特林数}
+	
+	第一类斯特林数: 将p个不同的物品分成k个非空循环排列的方法数
+	
+	$S(p, 0) = 0, p\geq 1$
+
+	$S(p, p) = 1, p\geq 0$
+
+	$S(p, k) = (p-1)S(p-1, k)+S(p-1, k-1), p-1\geq k\geq 1$
+
+	生成函数(可以用分治fft加速): $F(x) = \prod _{i=0}^{n-1}(x+i)$
+
+	第二类斯特林数
+
+	$S_2(p, 0) = 0, p\geq 1$
+
+	$S_2(p, p) = 1, p\geq 0$
+
+	$S_2(p, k) = kS_2(p-1, k)+S_2(p-1, k-1), p-1\geq k\geq 1$
+
+	恒等式:$n^m = \sum_{k=0}^m S(m,k)\cdot \binom{n}{k} k!$
+
+	生成函数(可以从恒等式二项式反演过来, 可以用fft加速): $S(n, k) = \sum _{i=0}^k (-1)^i \binom{k}{i}(k-i)^n$
+
+	下降幂公式: $x^n = \sum_{i=0}^n {n\brace i} x^{\underline i}$
+	\begin{table}[h!]
+		\begin{tabular}{|c|c|c|c|}
+		\hline
+		\textbf{k个球} & {m个盒子} & {是否允许有空盒子} & {方案数}\\
+		\hline
+	    各不相同 & 各不相同 & 是 & $m^k$ \\
+	    各不相同 & 各不相同 & 否 & $m!S_2(k, m)$\\
+	    各不相同 & 完全相同 & 是 & $\sum_{i=1}^{m} S_2(k, i)$\\
+		各不相同 & 完全相同 & 否 & $S_2(k, m)$\\
+		完全相同 & 各不相同 & 是 & $C、(m+k-1, k)$\\
+		完全相同 & 各不相同 & 否 & $C(k-1, m-1)$\\
+		完全相同 & 完全相同 & 是 & $\frac{1}{(1-x)(1-x^2)...(1-x^m)}[x^k]$\\ 
+		完全相同 & 完全相同 & 否 & $\frac{x^m}{(1-x)(1-x^2)...(1-x^m)}[x^k]$\\ 
+		\hline
+		\end{tabular}
+	\end{table}
+	
+\subsubsection{卡特兰数}
+	\begin{enumerate}
+		\item[$1.$] 括号匹配: 你有n个左括号，n个右括号，问有多少个长度为2n的括号序列使得所有的括号都是合法的
+		\item[$2.$] 进出栈问题
+		   有一个栈，我们有2n次操作，n次进栈，n次出栈，问有多少中合法的进出栈序列	
+		\item[$3.$] 312排列
+		    一个长度为$n$的排列$\{a\}$，只要满足$i<j<k$且$a_j<a_k<a_i$就称这个排列为312排列,求n的全排列中不是312排列的排列个数
+		\item[$4.$] 不相交弦问题
+		    在一个圆周上分布着 2n个点，两两配对，并在这两个点之间连一条弦，要求所得的2n条弦彼此不相交的配对方案数
+		\item[$5.$] 从(1, 1)走到(n, n)且不穿过对角线有多少条路径
+	\end{enumerate}
+\cppcode{Caterlan.cpp}
+	
+\subsubsection{组合数}
+	\begin{enumerate}
+		\item[$\bullet$] 链上不相邻地取k个数 $C(n-r+1, r)$
+		\item[$\bullet$] 大小为n的环上不相邻的选r个点 $C(n-r-1,r-1) + C(n-r, r) = C(n-r, r)\frac{n}{n-r}$
+	\end{enumerate}
+\subsection{博弈论}
+\subsubsection{sg函数}
+
+sg(x)=mex\{sg(y)\} y为x的可达状态点
+
+游戏和的SG函数等于各个游戏SG函数的异或和
+
+一般是把sg函数打印出来找规律
+
+\subsubsection{Nash均衡}
+
+对于一个决策， 有$p$的概率选择， $(1-p)$的概率不选择， 设选择的代价为$x$， 不选择的代价为$y$,  可以得到$z = px + (1-p)y$， 是一个喜闻乐见的线性规划式子
+
+\begin{enumerate}
+	\item[$\bullet$]nim -- 取最后一个的胜利: 先手必胜要求sg函数不为0
+	\item[$\bullet$]anti-nim -- 取最后一个的失败: 先手必胜要求sg函数不为0且存在一个$sg(x)>1$ 或 所有$sg(x)=1$且有偶数个游戏
+\end{enumerate}
+
+\subsection{多项式}
+
+\subsubsection{FFT}
+精度可能不大够， 预处理单位根会好很多
+\cppcode{FFT.cpp}
+
+\subsubsection{单位根反演}
+	\begin{enumerate}	
+		\item[1.]$[n|a] = \frac{1}{n} \sum_{k=0}^n \omega_n^{ak} $
+		\item[2.]$[a = b(mod\ n)] = [a - b = 0(mod\ n)] = [n|(a-b)] = \frac{1}{n}\sum_{i=0}^n-1 \omega_n^{(a-b)k} = \frac{1}{n}\sum_{i=0}^{n-1}\omega_n^{ak}\omega_{n}^{-bk}$
+	\end{enumerate}
+
+\subsubsection{NTT}
+跟FFT同理， 只是用原根$G^\frac{(P-1)}{n}$来代替$w_{n}^1$
+\cppcode{NTT2.cpp}
+\cppcode{NTT.cpp}
+
+\subsubsection{拆系数FFT}
+\cppcode{FFT2.cpp}
+
+\subsubsection{拉格朗日插值}
+一个n次多项式可以由n+1个点唯一确定
+$$F(x) = \sum_{k = 1}^{n+1} a_k x^k$$
+$$F(x) \equiv F(a)\ (Mod\ (x-a))$$
+$$F(x) \equiv y_i\ (Mod\ (x - x_i)) \ i\in [0, n]$$
+可以用中国剩余定理求出F(x), 复杂度为$O(N^2)$
+$$M = \prod (x - x_i),\ m_i = \prod_{i\neq j} (x - x_j)$$
+$$m_i^{-1} = \prod_{i\neq j} (x_i - x_j)\ (Mod\ (x - x_i))$$
+$$F(x) = \sum_{i=1}^{n+1}\ y_i\cdot \frac{m_i}{m_i^{-1}}(\ Mod \ M)$$
+当$x_i$连续的时候，上式可以变成
+$$F(x) = \sum_{i=1}^{n+1}\ y_i\cdot \frac{\prod_{i\neq j} (x - j)}{\prod_{i\neq j} (i - j)}(\ Mod \ M)$$
+其中， 分子的部分可以变成$\frac{\prod (x-j)}{x-i}$， 可以预处理
+
+分母的部分可以拆成两段阶乘的乘积$(i-1)!(n+1-i)!(-1)^{n+1-i}$
+
+可以在O(n)的时间内求出$F(x)$
+
+\cppcode{Lagerange2.cpp}
+\cppcode{Lagrange.cpp}
+
+\subsection{同余}
+%\subsubsection{高斯消元}
+\subsubsection{BSGS}
+%\cppcode{BSGS.cpp}
+%\subsubsection{ex-BSGS}
+
+\subsubsection{原根}
+\begin{enumerate}
+	\item[1.]概念及定理
+	\begin{enumerate}
+		\item[$\bullet$] 阶(即幂的最小循环节): $a$在模$p$意义下的阶是： 最小的整数$k$，使得$a^k \equiv 1(mod\ p)$， 记作$\delta_p(a)$
+		
+		\item[性质1.]: 设$p\ge 1, gcd(a, p)=1$， 若$a^n\equiv 1(mod p), n > 0$， 则$\delta_p(a) | n$
+		
+		\item[性质2.]: 设$\delta_p(a)|\phi(p)$
+		
+		\item[推论1.]: 若$p, q$均为奇质数， 且$q|(a^p-1)$则有$q|(a-1)$或$2p|(q-1)$
+		
+		\item[推论2.]：原根(满足$\delta_p(g) = \phi(p)$的$g$， 也即$g^{\phi(p)} \equiv 1(mod\ p)$)
+	\end{enumerate}
+\end{enumerate}
+
+\subsection{筛法}
+
+\subsubsection{常用积性函数关系}
+\begin{enumerate}
+	\item[0.] 若没有声明$*$表示狄利克雷卷积
+	\item[1.] $\epsilon = \mu * I$
+	\item[2.] $id = \varphi * I$
+	\item[3.] \begin{Large} $\sum_{i=1}^n \frac{\mu{(i)}}{i} = \frac{\phi{(n)}}{n}$\end{Large}
+\end{enumerate}
+
+\subsubsection{PN筛}
+\begin{enumerate}
+	\item[1.] $f = g * h$
+	\item[2.] $g$的前缀和$G$好求
+	\item[3.] $f(p) = g(p)$， 此时$h(p) = 0, h(1) = 1$
+	\item[4.] 有用的值即$h(n)>1$的n只有$O(\sqrt{n})$个
+\end{enumerate}
+$$S(n) = \sum_{i=1}^n f(i) \\
+	= \sum_{i=1}^n (h*g)(i) \\
+	= \sum_{i=1}^n \sum_{d|n} h(d)g(\frac{n}{d}) \\
+	= \sum_{d=1}^n h(d) \sum_i^{\lfloor \frac{n}{d} \rfloor} g(i)\\
+	= \sum_{d=1}^n h(d) G(\lfloor \frac{n}{d} \rfloor) \\
+$$
+
+\subsubsection{杜教筛}
+\begin{enumerate}
+	\item[1.] $f * g的前缀和好求$
+	\item[2.] 直接暴力是$O(n^{\frac{3}{4}})$的
+	\item[3.] 预处理前$O(n^{\frac{2}{3}})$项复杂度可以到$O(n^{\frac{2}{3}})$， 这个东西被叫做阈值分治
+	\item[4.] 如果需要多次递归可以先递归一次然后处理出每个需要的元素整除分块对应的根号个元素
+\end{enumerate}
+$$S(n) = \sum_{i=1}^n f(i)$$
+$$F(n) = \sum_{i=1}^n (f*g)(i) \\
+= \sum_{i=1}^n \sum_{d|i} f(d)g(\frac{i}{d}) \\
+= \sum_{d=1}^n g(d)\sum_{i}^{\lfloor \frac{n}{d} \rfloor} f(i) \\
+= \sum_{d=1}^n g(d)S(\lfloor \frac{n}{d} \rfloor)\\
+$$
+$$\sum_{i=1}^n (f*g)(i) = \sum_{d=1}^n g(d)S(\lfloor \frac{n}{d} \rfloor)$$
+$$g(1)S(n) = \sum_{i=1}^n (f*g)(i) - \sum_{d=2}^n g(d)S(\lfloor \frac{n}{d} \rfloor)$$
+
+\subsubsection{min25筛(待填)}
+
+\newpage
+
+\section{数据结构}
+
+\subsection{单调队列}
+\cppcode{queue.cpp}
+
+\subsection{线段树}
+
+\subsubsection{普通线段树}
+\cppcode{sgt.cpp}
+
+\subsubsection{动态开点线段树}
+\cppcode{sgt2.cpp}
+
+\subsubsection{主席树}
+\cppcode{主席树.cpp}
+
+\subsection{并查集}
+
+\subsubsection{普通并查集}
+\cppcode{dsu.cpp}
+
+\subsubsection{可删除并查集}
+\cppcode{dsu(delete).cpp}
+
+\newpage
+
+\section{字符串}
+
+\subsection{KMP算法}
+\cppcode{kmp.cpp}
+
+\subsection{后缀数组}
+后缀排序
+\cppcode{SA.cpp}
+%\subsection{ex-KMP算法}
+%\subsection{AC自动机}
+%\subsection{后缀自动机}
+
+\newpage
+
+\section{图论}
+
+\subsection{最短路 -- dij的最长路是错的}
+\cppcode{dijkstra.cpp}
+
+\subsection{二分图}
+
+\subsubsection{二分图最大匹配}
+\cppcode{hunery.cpp}
+
+\subsubsection{二分图最大权匹配}
+\cppcode{KM.cpp}
+
+\subsection{网络流}
+最大流
+效率$O(N^2M)$, 在二分图上复杂度可以达到$O(M\sqrt N)$
+\cppcode{dinic.cpp}
+
+费用流(EK)
+效率$O(NM^2F)$
+\cppcode{EK.cpp}
+
+\subsection{强连通分量}
+\cppcode{SCC.cpp}
+
+\subsection{点双联通分量}
+边双只需要low[v] > dfn[u]即可， 然后用强连通分量的弹栈方式
+\cppcode{DCC.cpp}
+
+%\section{计算几何}
+
+\newpage
+
+\section{杂项}
+
+\subsection{快读快输板子}
+\cppcode{io.cpp}
+
+\subsection{分治}
+\subsubsection{cdq分治}
+
+最长上升子序列的数量
+
+\cppcode{cdq.cpp}
+
+\subsubsection{树上点分治}
+
+$luogu3806$给定一棵树， 询问树上距离为k的点对是否存在
+
+\cppcode{DConTree.cpp}
+
+\subsection{莫队}
+\subsubsection{普通莫队}
+小z的袜子：n双袜子， 查询在[l,r]中抽到两只同色袜子的概率
+\cppcode{Mo3.cpp}
+\subsubsection{带修莫队}
+数颜色：查询l..r中有多少不同颜色的画笔， 把第i支画笔换成颜色p
+\cppcode{Mo2.cpp}
+\subsubsection{回滚莫队}
+只有单侧加没有减的莫队
+\cppcode{Mo.cpp}
+
+\subsection{悬线法}
+\cppcode{Line.cpp}
+
+\subsection{n数码问题}
+对于一个$n\times m$的矩阵， 有一个空格， 问能否将$n\times m - 1$个元素排序
+
+记一个矩阵的权值为$F(A)=$(状态A忽略空格时求出的逆序对数量+状态A将空格移动到状态B所需的行数*(A的列数+1))
+
+如果$F(A) = F(B)$那么两个矩阵可以相互转化
+
+\subsection{高精度板子}
+\cppcode{BigInt.cpp}
+
+\subsection{整体二分}
+k大数查询， 1.将c加入编号[l,r]的集合种， 2.查询[l, r]集合的并集中第k大的数是多少
+\cppcode{ztef.cpp}
+
+\subsection{背包回退(待写)}
+
+\end{document}
